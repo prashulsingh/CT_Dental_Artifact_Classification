@@ -33,11 +33,18 @@ def getAllDicomFiles():
             if filename.endswith('.dcm'):
                 if len(hash_map[folder_structure]) == 0:
                     hash_map[folder_structure].append(0)
-                    hash_map[folder_structure].append(filename)
+                    hash_map[folder_structure].append("")
+                    hash_map[folder_structure].append(False)
                 else:
                     hash_map[folder_structure][0] += 1
-                continue
-
+                if hash_map[folder_structure][2] == False:
+                    try:
+                        initialize_reader(os.path.join(folder_structure, filename))
+                        hash_map[folder_structure][1] = filename
+                        hash_map[folder_structure][2] = True
+                    except RuntimeError:
+                     pass
+    print( "reading all the dicom files successfully")
     return hash_map
 
 
@@ -49,7 +56,7 @@ def write_to_excel(sheet, wb):
     dicomTagValues.append([PATIENT_ID, '0010|0020'])
     dicomTagValues.append([STUDY_DESCRIPTION, '0008|1030'])
     dicomTagValues.append([SERIES_DATE, '0008|0021'])
-    dicomTagValues.append([SERIES_DESCRIPTION, '0008|103E'])
+    dicomTagValues.append([SERIES_DESCRIPTION, '0008|103e'])
     dicomTagValues.append([BODY_PART_EXAMINED, '0018|0015'])
     dicomTagValues.append([IMAGE_TYPE, '0008|0008'])
     dicomTagValues.append([PATIENT_POS, '0018|5100'])
@@ -61,6 +68,8 @@ def write_to_excel(sheet, wb):
     dicomTagValues.append([NO_OF_STACK_IMAGES, ''])
 
     for folder in hash_map:
+        if hash_map[folder][2] == False:
+            continue
         file_name = hash_map[folder][1]
         reader = initialize_reader(os.path.join(folder, file_name))
         for dicomTagValue in dicomTagValues:
@@ -71,7 +80,10 @@ def write_to_excel(sheet, wb):
                 sheet.write(i + 1, dicomTagValue[0], hash_map[folder][0])
                 continue
             try:
-                sheet.write(i + 1, dicomTagValue[0], str(reader.GetMetaData(dicomTagValue[1])).strip())  # Patient ID
+                if dicomTagValue[0] == SERIES_DESCRIPTION:
+                    sheet.write(i + 1, dicomTagValue[0], str(reader.GetMetaData(dicomTagValue[1]).encode('utf-8', 'surrogateescape')).strip())
+                else:
+                    sheet.write(i + 1, dicomTagValue[0],str(reader.GetMetaData(dicomTagValue[1])).strip())
             except KeyError:
                 pass
             except RuntimeError:
@@ -144,6 +156,6 @@ excel_file_path = str(sys.argv[2])
 # collectionNames = os.listdir(folderPath)
 # print(collectionNames)
 write_to_excel(sheet, wb)
-getAllDicomFiles()
+# getAllDicomFiles()
 print('****Metadata extraction completed****')
 print('Excel file created at', excel_file_path)
