@@ -1,23 +1,25 @@
 
 $(document).ready(function() {
 
-   
+    cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+
 });
 var i =0;
 var info=[];
 var csvFilesFound = [];
 function showDicomFiles(context)
 {
-    console.log( context );
+    var filesList = document.getElementById( 'client-files' ).files;
+    if( Array.from(filesList).length == 0 )
+        return;
     csvFilesFound = [];
     info = [];
     i = 0;
     // retrieve files from the input type=file 
-    var filesList = document.getElementById( 'client-files' ).files;
-    cornerstoneFileImageLoader.purge();
-    //empty all the files within the image container
+        //empty all the files within the image container
     document.getElementById("imagesContainer").innerHTML = "";
     // Add our tool, and set it's mode
+    cornerstoneWADOImageLoader.wadouri.fileManager.purge();
 
 
     Array.from(filesList).forEach( function( file ){
@@ -26,10 +28,10 @@ function showDicomFiles(context)
         {
             document.getElementById("imagesContainer").insertAdjacentHTML('beforeend',  generateHTMLContentForImage(filesList[i]) );         
             element  = $("div[id='" + fileName + "_img_holder']").get(0);
+            fileNameElement  = $("div[id='" + fileName + "_img_name']").get(0);
+            fileNameElement.innerHTML = fileName;
             cornerstone.enable(element);
-            var index = cornerstoneFileImageLoader.addFile(file);
-            // create an imageId for this image
-            imageId = "dicomfile://" + index;
+            imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
             info[i] = new Array(2);
             info[i][0] =  element;
             info[i][1] = imageId;
@@ -42,26 +44,22 @@ function showDicomFiles(context)
         }
 
     });
-    cornerstoneTools.init();
-    cornerstoneTools.external.cornerstone = cornerstone;
-    cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
-    cornerstoneTools.setToolActive();
+
     Array.from(info).forEach( function( info ) {
     var element = cornerstone.loadImage(info[1]).then(function(image) {
-        console.log(  info[0] );
         cornerstone.displayImage(info[0], image);
         cornerstoneTools.mouseInput.enable(info[0]);
         cornerstoneTools.mouseWheelInput.enable(info[0]);
-        // cornerstoneTools.wwwc.activate(info[0], 1); // Left Click
-        // cornerstoneTools.pan.activate(info[0], 2); // Middle Click
-        // cornerstoneTools.zoom.activate(info[0], 4); // Right Click
-        // cornerstoneTools.zoomWheel.activate(info[0]); // Mouse Wheel
-    });
-    });
+        cornerstoneTools.wwwc.activate(info[0], 1); // ww/wc is the default tool for left mouse button
+        cornerstoneTools.pan.activate(info[0], 2); // pan is the default tool for middle mouse button
+        cornerstoneTools.zoom.activate(info[0], 4); // zoom is the default tool for right mouse button
+        cornerstoneTools.zoomWheel.activate(info[0]); // zoom is the default tool for middle mouse wheel
 
+    });
+    });
+    
+    
     updateAnnotationFileFound();
-
-    console.log( filesList );
     attachRadioButtonEvent();
 }
 function updateAnnotationFileFound()
@@ -104,20 +102,22 @@ function generateHTMLContentForImage( fileInfo )
 {
     var fileName = fileInfo.name;
     var htmlString = [ '<div class = "image" >',
-    '<div id=\"' + fileName + "_img_holder" + '\" style="width:330px;height:330px;top:0px;left:0px; position:absolute">',
+    '<div id=\"' + fileName + "_img_holder" + '\" style="width:100%;height:94%;top:0px;left:0px; position:absolute">',
     '</div>',
-    '<div style="top:330px;width:375px; position:absolute; display:inline;color:black;margin:0px;">',
+    '<div id=\"' + fileName + "_img_name" + '\" style="position:absolute;top:0px;left:0px;color:white">',
+    '</div>',
+    '<div style="top:330px;width:100%; position:absolute; display:inline;color:black;margin:0px;">',
     '<input  checked type="radio"  name=\"' + fileName + '\" value="low" />',
         '<label for="one">Low</label>',
-        '<input  type="radio" style="margin-left:18%" name=\"' + fileName + '\" value="medium" />',
+        '<input  type="radio" style="margin-left:25%" name=\"' + fileName + '\" value="medium" />',
         '<label for="two">Medium</label>',
-        '<input onchange="myFunction()" type="radio"  style=\"margin-left:18%\"name=\"' + fileName + '\" value="high" />',
+        '<input onchange="myFunction()" type="radio"  style=\"margin-left:17%\"name=\"' + fileName + '\" value="high" />',
         '<label for="two">High</label>',
     '</div>',
 '</div >' 
 ].join("\n");
 
-    console.log( htmlString );
+   // console.log( htmlString );
     return htmlString;
 
 }
@@ -146,9 +146,9 @@ var span = document.getElementsByClassName("close")[0];
 
 // When the user clicks the button, open the modal 
 function retrieveAnnotation()
-{
-    
+{   
   modal.style.display = "block";
+  document.getElementById( "folderLoc"  ).value = document.getElementById( "folder_loc"  ).value;
 }
 
 // When the user clicks on <span> (x), close the modal
@@ -171,12 +171,16 @@ function download(filename, text) {
 
 // Start file download.
 document.getElementById("download").addEventListener("click", function(){
-    // Generate download of hello.txt file with some content
     var csvContent = getContent( document.getElementById("folderLoc").value );
     var fileName = document.getElementById("annotationFileName").value;
-    
-    
+    if( fileName.length == 0 )
+        {
+            alert("Please provide annotation File Name");
+            return;
+        }
+
     download(fileName, csvContent);
+    document.getElementById("retrieveAnnotation").style.display="none";
 }, false);
 
 function getContent( folderPath )

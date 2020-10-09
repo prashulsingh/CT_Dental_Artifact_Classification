@@ -40,7 +40,7 @@
   .image {
     margin:0.5%;
     margin-left:2%;
-    width:27%;
+    width:27.5%;
     height:350px;
     position:relative;
     display:inline-block;
@@ -48,6 +48,7 @@
 }
 #imagesContainer
 {
+    padding-left: 5%;
     border-style:ridge
 
 }
@@ -61,10 +62,14 @@
 #annotationLabel
 {
     display: none;
-    margin-left : 5%;
 }
 #annotationFiles
 {
     display: none;
     color : blue;
+}
+.annotationDiv
+{
+  margin:1%;
+  padding-left: 20.5%;
 }
