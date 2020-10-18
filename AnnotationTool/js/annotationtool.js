@@ -117,9 +117,9 @@ function generateHTMLContentForImage( fileInfo )
         '<label for="one">Low</label>',
         '<input  type="radio" style="margin-left:25%" name=\"' + fileName + '\" value="medium" />',
         '<label for="two">Medium</label>',
-        '<input onchange="myFunction()" type="radio"  style=\"margin-left:17%\"name=\"' + fileName + '\" value="high" />',
+        '<input onchange="myFunction()" type="radio"  style=\"margin-left:9%\"name=\"' + fileName + '\" value="high" />',
         '<label for="two">High</label>',
-        '<input type=\"checkbox\" id=\"' + fileName + "_checkbox" + '\"  onclick=\"checkBoxClick(this)\" style=\"margin-left: 2%\">',    
+        '<input type=\"checkbox\" id=\"' + fileName + "_checkbox" + '\"  onclick=\"checkBoxClick(this)\">',    
     '</div>',
 '</div >' 
 ].join("\n");
@@ -199,6 +199,7 @@ function getContent( folderPath )
 {
     radioBoxes = $('input[type=radio]:checked');
     content  = "";
+	start = false;
     Array.from(radioBoxes).forEach( function( radioBox ){
         fileName = radioBox.name.substr( 0, radioBox.name.lastIndexOf("." ) );
         
