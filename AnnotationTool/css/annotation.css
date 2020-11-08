@@ -41,7 +41,7 @@
     margin:0.5%;
     margin-left:2%;
     width:27.5%;
-    height:350px;
+    height:370px;
     position:relative;
     display:inline-block;
     border-style:ridge
@@ -49,10 +49,13 @@
 #imagesContainer
 {
     padding-left: 5%;
-    border-style:ridge
-
 }
 
+#reviewFiles:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
 .fileInfo
 {
     border-style:ridge

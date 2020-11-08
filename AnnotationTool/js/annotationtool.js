@@ -7,6 +7,8 @@ $(document).ready(function() {
 var i =0;
 var info=[];
 var csvFilesFound = [];
+checkInIds=[];
+reviewIds=[];
 function showDicomFiles(context)
 {
     var filesList = document.getElementById( 'client-files' ).files;
@@ -14,7 +16,7 @@ function showDicomFiles(context)
         return;
     csvFilesFound = [];
     checkInIds=[]
-    
+    reviewIds =[]
     i = 0;
     // retrieve files from the input type=file 
         //empty all the files within the image container
@@ -94,9 +96,9 @@ function attachRadioButtonEvent()
         case 'medium':
         $(this).parent().parent()[0].style.borderColor="blue";
           break;
-          case 'high':
-          $(this).parent().parent()[0].style.borderColor="yellow";
-          break;
+        case 'high':
+        $(this).parent().parent()[0].style.borderColor="red";
+        break;
         }
 
     // Listen for the change event on our input element so we can get the
@@ -108,7 +110,7 @@ function generateHTMLContentForImage( fileInfo )
 {
     var fileName = fileInfo.name;
     var htmlString = [ '<div class = "image" >',
-    '<div id=\"' + fileName + "_img_holder" + '\" style="width:99%;height:94%;top:0px;left:0px; position:absolute">',
+    '<div id=\"' + fileName + "_img_holder" + '\" style="width:99%;height:90%;top:0px;left:0px; position:absolute">',
     '</div>',
     '<div id=\"' + fileName + "_img_name" + '\" style="position:absolute;top:0px;left:0px;color:white">',
     '</div>',
@@ -116,10 +118,15 @@ function generateHTMLContentForImage( fileInfo )
     '<input  checked type="radio"  name=\"' + fileName + '\" value="low" />',
         '<label for="one">Low</label>',
         '<input  type="radio" style="margin-left:25%" name=\"' + fileName + '\" value="medium" />',
-        '<label for="two">Medium</label>',
+        '<label >Medium</label>',
         '<input onchange="myFunction()" type="radio"  style=\"margin-left:9%\"name=\"' + fileName + '\" value="high" />',
-        '<label for="two">High</label>',
-        '<input type=\"checkbox\" id=\"' + fileName + "_checkbox" + '\"  onclick=\"checkBoxClick(this)\">',    
+        '<label >High</label>',
+        '<div style=\"padding-left: 26%;border-style: ridge\">',
+        '<input type=\"checkbox\" id=\"' + fileName + "_review" + '\"  onclick=\"checkBoxReviewClick(this)\">',    
+        '<label >Review</label>',
+        '<input type=\"checkbox\" style=\"margin-left: 20%;\" type=\"checkbox\" id=\"' + fileName + "_exclude" + '\"  onclick=\"checkBoxExcludeClick(this)\">', 
+        '<label >Exclude</label>',
+        '</div>',
     '</div>',
 '</div >' 
 ].join("\n");
@@ -135,10 +142,10 @@ function validFile( fileInfo  )
 }
 
 function getParentDirectory(){
-    var folderPath = document.getElementById( 'folder-url' ).value;
+    var folderPath = document.getElementById( 'folder_loc' ).value;
 
     if( typeof(folderPath) == 'undefined' || folderPath === null || folderPath == ""   )
-        alert( 'Please provide valid folder folder path containig DICOM Images ');
+        alert( 'Please provide valid  folder path containig DICOM Images ');
     return folderPath;
 }
 
@@ -216,7 +223,6 @@ function getContent( folderPath )
 
         content = content + row;
     });
-    console.log( content );
     return content;
 }
 
@@ -240,6 +246,32 @@ document.getElementById("zoomIn").addEventListener('click', function(e){
         cornerstone.setViewport( elementInfo[0], viewport);
     });
 });   
+document.getElementById("reviewFiles").addEventListener('click', function(e){
+    folderPath = getParentDirectory();
+    $('input[name="1-219.dcm"]:checked').val();
+    reviewInfo=[];
+    for( i = 0 ; i < reviewIds.length; i++ )
+    {   
+        info = []
+        info.push( folderPath );
+        info.push( reviewIds[i] + ".dcm" );
+        info.push( $("input[name='" + reviewIds[i]+ ".dcm' ]:checked").val() );
+        reviewInfo.push( info )
+    }
+    csvContent = ""
+    reviewInfo.forEach(function(rowArray) {
+    let row = rowArray.join(",");
+    csvContent += row + "\r\n";
+    });
+    const el = document.createElement('textarea');
+          el.value = csvContent;
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+}); 
+
+
 document.getElementById("zoomOut").addEventListener('click', function(e){
     Array.from(info).forEach( function( elementInfo ){
         const viewport = cornerstone.getViewport( elementInfo[0] );
@@ -253,8 +285,7 @@ document.getElementById("resetZoom").addEventListener('click', function(e){
         cornerstone.reset(elementInfo[0]);
     });
 });  
-checkInIds=[];
-function checkBoxClick( e )
+function checkBoxExcludeClick( e )
 {
     var id = e.id.substr( 0, e.id.lastIndexOf("." ) );
     if( e.checked )
@@ -264,9 +295,27 @@ function checkBoxClick( e )
 var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 checkInIds.sort(collator.compare);
 deactivateImages();
-console.log( checkInIds );
+//console.log( checkInIds );
 }
-
+function checkBoxReviewClick( e )
+{
+    var parentElement = e.parentElement.parentElement.parentElement;
+    var parentBorderColor = parentElement.style.borderColor;
+    var id = e.id.substr( 0, e.id.lastIndexOf("." ) );
+    if( e.checked )
+    {      reviewIds.push( id );
+          parentElement.style.border="dotted";
+          parentElement.style.borderColor=parentBorderColor
+    }
+    else
+    {
+        reviewIds = reviewIds.filter(reviewId => reviewId !== id);
+        parentElement.style.border="ridge";
+    } 
+    parentElement.style.borderColor=parentBorderColor;
+   // console.log( reviewIds );
+    
+}
 function deactivateImages()
 {
     Array.from(document.getElementsByClassName('inactive')).forEach(function(el) { 
