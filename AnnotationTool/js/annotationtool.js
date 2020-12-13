@@ -162,7 +162,8 @@ function loadSecondaryRaterAnnotation()
             {
                 var label = document.getElementById( filename + "_secondary_rater" );
                 label.parentElement.parentElement.parentElement.classList.add("borderBlink");
-                label.innerHTML =secondaryRatercategoryName ;
+                label.innerHTML ="Category Diff :" + secondaryRatercategoryName ;
+                label.style.display="";
             }  
          
 
@@ -237,13 +238,12 @@ function generateHTMLContentForImage( fileInfo )
         '<label >Medium</label>',
         '<input onchange="myFunction()" type="radio"  style=\"margin-left:9%\"name=\"' + fileName + '\" value="high" />',
         '<label >High</label>',
-        '<div style=\"padding-left: 26%;border-style: ridge\">',
+        '<div style=\"border-style: ridge\">',
         '<input type=\"checkbox\" id=\"' + fileName + "_review" + '\"  onclick=\"checkBoxReviewClick(this)\">',    
         '<label >Review</label>',
-        '<input type=\"checkbox\" style=\"margin-left: 20%;\" type=\"checkbox\" id=\"' + fileName + "_exclude" + '\"  onclick=\"checkBoxExcludeClick(this)\">', 
+        '<input type=\"checkbox\" style=\"margin-left: 10%;\" type=\"checkbox\" id=\"' + fileName + "_exclude" + '\"  onclick=\"checkBoxExcludeClick(this)\">', 
         '<label >Exclude</label>',
-        '<label style=\"margin-left: 4%;\">Category diff</label>',
-        '<label id=\"' + fileName + "_secondary_rater" + '\"></label>',
+        '<label style=\"margin-left: 4%;display:none\" id=\"' + fileName + "_secondary_rater" + '\"></label>',
         '</div>',
     '</div>',
 '</div >' 
