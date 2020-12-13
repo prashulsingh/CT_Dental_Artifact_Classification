@@ -12,9 +12,10 @@ reviewIds=[];
 function showDicomFiles(context)
 {
     var filesList = document.getElementById( 'client-files' ).files;
+  
     if( Array.from(filesList).length == 0 )
         return;
-    csvFilesFound = [];
+    csvFilesFound = []
     checkInIds=[]
     reviewIds =[]
     i = 0;
@@ -29,7 +30,7 @@ function showDicomFiles(context)
         cornerstone.disable( elementInfo[0] );
     });
     info=[];
-
+  
     Array.from(filesList).forEach( function( file ){
         fileName = file.name;
         if( validFile( file ) )
@@ -48,10 +49,15 @@ function showDicomFiles(context)
         }
         else if ( fileName.endsWith( ".csv" ) )
         {
-            csvFilesFound.push( fileName );
+            csvFilesFound.push( file );
+            
         }
 
     });
+
+   csvFilesFound.sort((a, b) => (a.lastModified - b.lastModified))
+
+    // console.log( csvFilesFound )
 
     Array.from(info).forEach( function( info ) {
     var element = cornerstone.loadImage(info[1]).then(function(image) {
@@ -70,6 +76,112 @@ function showDicomFiles(context)
     updateAnnotationFileFound();
     attachRadioButtonEvent();
 }
+function loadPrimaryRaterAnnotation()
+{
+    // console.log( "primaryAnnotation")
+    
+    let reader = new FileReader();
+    let file = csvFilesFound[0];
+    reader.readAsText(file);
+    // console.log( file )
+    reader.onload = function() {
+        csvContent = reader.result;
+        var lines = csvContent.split("\n");
+        while( typeof lines[0] !== "undefined" ){
+            var line = lines.shift();
+            var split = line.split(',');
+            var filePath = split[0];
+            if( split.length <= 1 )
+                continue;
+            var categoryName = split[1].trim();
+            var filename = filePath.replace(/^.*[\\\/]/, '');
+            input = document.getElementsByName( filename );
+            var event = new CustomEvent('change');
+
+            if( "medium".localeCompare(categoryName) == 0 )
+            {
+                input[1].checked = true;  
+                input[1].dispatchEvent(event);
+            }  
+            else if( "high".localeCompare(categoryName) == 0 )
+            {
+                input[2].checked = true;
+                input[2].dispatchEvent(event);
+            }
+            else if( "excluded".localeCompare(categoryName) == 0 )
+            {
+                var event = new CustomEvent('click');
+                input = document.getElementById(filename+"_exclude");
+                input.checked = true;
+                input.dispatchEvent(event);
+            }
+            
+            
+        }
+    loadSecondaryRaterAnnotation();  
+    };
+
+    reader.onerror = function() {
+        alert(reader.error);
+    };
+    
+}
+function getPrimaryRaterValue(filename)
+{
+    input = document.getElementsByName( filename );
+    var excludedCheckBox = document.getElementById( filename + "_exclude" );
+    if( excludedCheckBox.checked )
+        return "excluded";
+    for(i = 0; i < input.length; i++) { 
+        if(input[i].checked) 
+                return input[i].value; 
+
+    }
+return "";
+}
+function loadSecondaryRaterAnnotation()
+{
+    // console.log("Secondary Annotation");
+    let reader = new FileReader();
+    let file = csvFilesFound[1];
+    // console.log( file );
+    reader.readAsText(file);
+    
+    reader.onload = function() {
+        csvContent = reader.result;
+        var lines = csvContent.split("\n");
+        while( typeof lines[0] !== "undefined" ){
+            var line = lines.shift();
+            var split = line.split(',');
+            var filePath = split[0];
+            var secondaryRatercategoryName = split[1].trim();
+            var filename = filePath.replace(/^.*[\\\/]/, '');
+            primaryRaterCategoryName = getPrimaryRaterValue( filename );
+
+            if( primaryRaterCategoryName.localeCompare(secondaryRatercategoryName) != 0 )
+            {
+                var label = document.getElementById( filename + "_secondary_rater" );
+                label.parentElement.parentElement.parentElement.classList.add("borderBlink");
+                label.innerHTML =secondaryRatercategoryName ;
+            }  
+         
+
+        }
+    };
+
+    reader.onerror = function() {
+        alert(reader.error);
+    };
+}
+
+function retrieveAnnotationFromCSV(){
+    if( csvFilesFound == null || csvFilesFound.length < 2 )
+        return;
+
+    loadPrimaryRaterAnnotation();
+
+
+}
 function updateAnnotationFileFound()
 {
     annotationLabel = document.getElementById( "annotationLabel"  );
@@ -83,7 +195,11 @@ function updateAnnotationFileFound()
     }
     annotationLabel.style.display = "inline";
     annotationFiles.style.display = "inline";
-    annotationFiles.innerHTML = csvFilesFound.toString();
+    csvFileList = []
+    csvFilesFound.forEach(function(entry) {
+        csvFileList.push(entry.name)
+    });
+    annotationFiles.innerHTML = csvFileList.toString();
     
 }
 function attachRadioButtonEvent()
@@ -126,12 +242,13 @@ function generateHTMLContentForImage( fileInfo )
         '<label >Review</label>',
         '<input type=\"checkbox\" style=\"margin-left: 20%;\" type=\"checkbox\" id=\"' + fileName + "_exclude" + '\"  onclick=\"checkBoxExcludeClick(this)\">', 
         '<label >Exclude</label>',
+        '<label style=\"margin-left: 4%;\">Category diff</label>',
+        '<label id=\"' + fileName + "_secondary_rater" + '\"></label>',
         '</div>',
     '</div>',
 '</div >' 
 ].join("\n");
 
-   // console.log( htmlString );
     return htmlString;
 
 }
@@ -285,6 +402,7 @@ document.getElementById("resetZoom").addEventListener('click', function(e){
         cornerstone.reset(elementInfo[0]);
     });
 });  
+
 function checkBoxExcludeClick( e )
 {
     var id = e.id.substr( 0, e.id.lastIndexOf("." ) );
@@ -295,7 +413,6 @@ function checkBoxExcludeClick( e )
 var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 checkInIds.sort(collator.compare);
 deactivateImages();
-//console.log( checkInIds );
 }
 function checkBoxReviewClick( e )
 {
@@ -313,7 +430,6 @@ function checkBoxReviewClick( e )
         parentElement.style.border="ridge";
     } 
     parentElement.style.borderColor=parentBorderColor;
-   // console.log( reviewIds );
     
 }
 function deactivateImages()

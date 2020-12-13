@@ -25,8 +25,10 @@
                     <label>Folder Location</label>
                     <input id="folder_loc" ype="text" size = "70" name="dicom_folder_loc" />
                     
-                    <button  id ="retrieveAnnotationBtn" style = "margin-left:5%" onclick="retrieveAnnotation()">Retrieve Annotation as CSV</button>
+                    <button  id ="retrieveAnnotationBtn" style = "margin-left:2%" onclick="retrieveAnnotation()">Retrieve Annotation as CSV</button>
+                    <button  id ="retrieveAnnotationFromCSVBtn"  onclick="retrieveAnnotationFromCSV()">Retrieve Annotation from CSV</button>
                 </div>
+                
                 <div class ="annotationDiv">
                     <label id="annotationLabel">Annotation Files Found</label>
                     <label id = "annotationFiles"></label>

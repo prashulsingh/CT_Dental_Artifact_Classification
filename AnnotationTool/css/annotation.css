@@ -89,3 +89,28 @@
 .inactive{
   opacity: 0.25;
 }
+
+@-webkit-keyframes borderBlink {    
+  from, to {    
+      border-color: transparent    
+  }    
+  50% {    
+      border-color: black    
+  }    
+}    
+@keyframes borderBlink {    
+  from, to {    
+      border-color: transparent    
+  }    
+  50% {    
+      border-color: black    
+  }    
+}    
+.borderBlink{    
+  border:1px solid black;
+  /* add 'border-color: transparent' if you wish no border to show initially */  
+}
+.borderBlink {    
+  -webkit-animation: borderBlink 1s step-end infinite;    
+  animation: borderBlink 1s step-end infinite;    
+}
