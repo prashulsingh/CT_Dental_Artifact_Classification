@@ -3,12 +3,12 @@
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
-    padding-top: 100px; /* Location of the box */
+    padding-top: 180px; /* Location of the box */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
+    /* overflow: auto; Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
   }
@@ -41,7 +41,7 @@
     margin:0.5%;
     margin-left:2%;
     width:27.5%;
-    height:350px;
+    height:370px;
     position:relative;
     display:inline-block;
     border-style:ridge
@@ -49,10 +49,13 @@
 #imagesContainer
 {
     padding-left: 5%;
-    border-style:ridge
-
 }
 
+#reviewFiles:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
 .fileInfo
 {
     border-style:ridge
@@ -72,4 +75,42 @@
 {
   margin:1%;
   padding-left: 20.5%;
+}
+
+.sticky {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  width: 100%;
+  background:#D3D3D3;
+  z-index: 10;
+}
+
+.inactive{
+  opacity: 0.25;
+}
+
+@-webkit-keyframes borderBlink {    
+  from, to {    
+      border-color: transparent    
+  }    
+  50% {    
+      border-color: black    
+  }    
+}    
+@keyframes borderBlink {    
+  from, to {    
+      border-color: transparent    
+  }    
+  50% {    
+      border-color: black    
+  }    
+}    
+.borderBlink{    
+  border:1px solid black;
+  /* add 'border-color: transparent' if you wish no border to show initially */  
+}
+.borderBlink {    
+  -webkit-animation: borderBlink 1s step-end infinite;    
+  animation: borderBlink 1s step-end infinite;    
 }
