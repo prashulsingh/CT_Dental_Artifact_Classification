@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/AutoEncoders.iml" filepath="$PROJECT_DIR$/.idea/AutoEncoders.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CT_Dental_Artifact_Classifier.iml" filepath="$PROJECT_DIR$/.idea/CT_Dental_Artifact_Classifier.iml" />
     </modules>
   </component>
 </project>
