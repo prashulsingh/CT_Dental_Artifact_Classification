@@ -24,7 +24,13 @@ for dir_path in dir_paths:
     listOfFolders[3] = parallel_dir_name
     parallel_directory_path = "/"+os.path.join(*listOfFolders)
     print(parallel_directory_path)
-    os.makedirs(parallel_directory_path,exist_ok=True)
+    try:
+        original_umask = os.umask(0)
+        desired_permission= 0o777
+        os.makedirs(parallel_directory_path, exist_ok=True)
+        os.makedirs('full/path/to/new/directory', desired_permission)
+    finally:
+        os.umask(original_umask)
     for s in slices:
         fileName = os.path.splitext( os.path.split(s.filename)[1] )[0]
         ordered_file_name = fileName + "_" + str(index) + ".dcm"
